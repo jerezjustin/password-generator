@@ -6,10 +6,19 @@ namespace JerezJustin\Tests;
 
 use JerezJustin\Exceptions\PasswordGeneratorException;
 use JerezJustin\PasswordGenerator;
+use JerezJustin\Tests\Support\PasswordGeneratorConfigProvider;
 use PHPUnit\Framework\TestCase;
 
 class PasswordGeneratorTest extends TestCase
 {
+	use PasswordGeneratorConfigProvider;
+
+	private array $charTypes = [
+		'lowercase' => 'a-z',
+		'uppercase' => 'A-Z',
+		'numbers' => '0-9',
+		'specialCharacters' => '!@#$%^&*()\-_=+\[\]{}|;:,.<>?\''
+	];
 
 	private PasswordGenerator $passwordGenerator;
 
@@ -18,6 +27,7 @@ class PasswordGeneratorTest extends TestCase
 		$this->passwordGenerator = new PasswordGenerator();
 		$this->passwordGenerator->includeSpecialCharacters(true);
 	}
+
 
 	public function test_it_can_create_a_password_with_default_configuration(): void
 	{
@@ -28,6 +38,27 @@ class PasswordGeneratorTest extends TestCase
 
 		$this->assertIsString($password);
 		$this->assertEquals($expectedLength, strlen($password));
+	}
+
+
+	/**
+	 * @dataProvider PasswordGeneratorConfigProvider
+	 */
+	public function test_it_can_successfully_create_a_password_with_the_provided_configuration(array $config): void
+	{
+		$password = $this->passwordGenerator
+			->length($expectedLength = 16)
+			->includeLowercase((bool)$config['lowercase'])
+			->includeUppercase((bool)$config['uppercase'])
+			->includeNumbers((bool)$config['numbers'])
+			->includeSpecialCharacters((bool)$config['specialCharacters'])
+			->generate();
+
+		$this->assertTrue(strlen($password) === $expectedLength);
+
+		foreach ($this->charTypes as $property => $charType) {
+			$this->assertSame((bool)preg_match("/[$charType]/", $password), (bool)$config[$property]);
+		}
 	}
 
 	public function test_it_can_create_a_password_without_lowercase_characters(): void
