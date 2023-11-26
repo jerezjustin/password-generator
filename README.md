@@ -4,6 +4,12 @@ This is a basic password generator created with the finality of learning the pro
 
 ## How to use 
 
+To install the package just run the following command in the terminal:
+
+```composer 
+composer require jerezjustin/random-password-generator
+```
+
 The password generator is easy to use it consists of only one class to generate password. Here is an example of how 
 can you use it.
 
